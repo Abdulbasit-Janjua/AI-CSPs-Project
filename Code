@@ -1,0 +1,89 @@
+# AI Course
+# Sir Muhammad Shakeel
+# Abdulbasit
+# 201980014
+# Section C
+
+
+from simpleai.search import CspProblem, backtrack, min_conflicts, MOST_CONSTRAINED_VARIABLE, HIGHEST_DEGREE_VARIABLE, LEAST_CONSTRAINING_VALUE
+
+
+gaming_domains = ['SC','GTA','COD','MK','TO','RL','DS']
+
+# Constraint for kiran must supervise these games 
+def cons_kiran(variables, values):
+    return values[0] == 'SC' or values[0] == 'GTA' or values[0] == 'COD'
+
+# Constraint for naila cannot supervise RL
+def cons_naila(variables, values):
+    return values[0] != 'RL'
+
+# Constraint for Faisal cannot supervise MK,TO or RL
+def cons_faisal(variables, values):
+    if values[0] == 'MK' or values[0] == 'TO' or values[0] == 'RL':
+        return False
+    else:
+        return True
+
+# Constraint that Daud cannot supervise TO
+def cons_daud(variables, values):
+    return values[0] != 'TO'
+
+# Constraint that someone must have a game different
+# than the other one
+def diffrent_game(variables,values):   
+    return values[0]!=values[1]
+
+
+# Constraint for games which is choosen by parent must not choosed by child node
+# (person depends on other) showed in list
+def choosed_games(variables,values):
+    return gaming_domains.index(values[0])<gaming_domains.index(values[1])
+
+
+if __name__=='__main__':
+    variables = ('Baber', 'Daud', 'Faisal', 'Jameela' , 'Kiran' , 'Marium' , 'Naila')
+    
+# part (c).....
+    lcv_variables = ('Marium', 'Daud', 'Faisal', 'Jameela' , 'Kiran' , 'Baber' , 'Naila')
+
+    domains = {
+        'Baber': ['RL'],
+        'Daud': ['SC' , 'GTA', 'COD' , 'MK' , 'TO' , 'RL' , 'DS'],
+        'Faisal': ['SC' , 'GTA', 'COD' , 'MK' , 'TO' , 'RL' , 'DS'],
+        'Jameela': ['SC' , 'GTA', 'COD' , 'MK' , 'TO' , 'RL' , 'DS'],
+        'Kiran': ['SC' , 'GTA', 'COD' , 'MK' , 'TO' , 'RL' , 'DS'],
+        'Marium': ['COD' , 'TO', 'DS'],
+        'Naila': ['SC' , 'GTA', 'COD' , 'MK' , 'TO' , 'RL' , 'DS']
+    }
+
+    constraints = [
+        (('Kiran'), cons_kiran),
+        (('Naila'), cons_naila),
+        (('Faisal'), cons_faisal),
+        (('Daud'), cons_daud),
+        (('Naila','Marium'),choosed_games),
+        (('Kiran','Daud'),choosed_games),
+        (('Naila','Jameela'),choosed_games),
+        (('Daud','Faisal'),choosed_games),
+        (('Baber','Naila'),diffrent_game),
+        (('Daud','Jameela'),diffrent_game)
+    ]
+
+    unary_Constraints = [
+        (('Kiran'), cons_kiran),
+        (('Faisal'), cons_faisal),
+        (('Daud'), cons_daud),
+        (('Naila'), cons_naila),
+    ]
+
+# Defining CSP problems...
+    problem_simpleSolution = CspProblem(variables, domains, constraints)
+    problem_partA = CspProblem(variables, domains, unary_Constraints)
+    problem_partC = CspProblem(lcv_variables, domains, constraints)
+
+    print('\nSolution:\n:', backtrack(problem_simpleSolution))
+    print('\nUnary Constraint:', backtrack(problem_partA))
+    print('\nWhen MRV heuristic is applied then baber will assigned first ')
+    print('\nWhen LCV heuristic with Marium as first variable is applied: '
+          , backtrack(problem_partC, value_heuristic=LEAST_CONSTRAINING_VALUE))
